@@ -1,0 +1,186 @@
+from django.http import HttpResponse
+from pymongo import MongoClient
+import datetime
+import pymongo
+
+from django.http import HttpResponseRedirect
+import math
+import time
+from django.template import Template, Context
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render_to_response
+from django.http import Http404
+
+
+client = MongoClient()
+db = client.eshop
+
+def htmlRender(html_name):
+    fp = open(html_name)
+    t = Template(fp.read())
+    fp.close()
+    html = t.render(Context())
+    return HttpResponse(html)
+
+
+def open_html(html_name):
+    fp = open(html_name)
+    t = Template(fp.read())
+    fp.close()
+    return t
+
+
+def hello(request):
+    return HttpResponse("Hello world")
+
+
+@csrf_exempt
+def signin(request):
+    if request.method == 'POST':
+        find2 = find_user(request.POST['userName'],request.POST['pass'])
+        if find2 != False:
+            find = str(find2['_id']);
+
+            if is_admin(request.POST['userName']):
+                request.session['is_admin']=True
+
+            request.session['member_id'] = find
+            request.session['member_name'] = find2['name']
+            request.session['member_uName'] = find2['username']
+            return HttpResponseRedirect('/home/')
+        else:
+            t = open_html('template/signIn.html')
+            message = HttpResponse(t.render(Context({'message': 'user name or pass is not correct!!'})))
+    else:
+        message = htmlRender('template/signIn.html')
+    return message
+
+
+@csrf_exempt
+def signup(request):
+    if request.method == 'POST':
+        user = create_user(request.POST['name'],request.POST['userName'],request.POST['pass'])
+        if user is None:
+            t = open_html('template/signUp.html')
+            html = t.render(Context({'message': 'User existing before!!'}))
+        else:
+            dbname=user['name']
+           # id=user['_id']
+            dbusername=user['username']
+            dbpass=user['password']
+
+            html = 'added user:  '  + dbname + " " + dbusername + " " + dbpass # just for test
+            t = open_html('template/firstPage.html')
+            html += t.render(Context({'message': 'Your account correctly added, for enter please sign in.'}))
+
+    else:
+        html = htmlRender('template/signUp.html')
+    return HttpResponse(html)
+
+def logout(request):
+    try:
+        del request.session['member_id']
+    except KeyError:
+        return HttpResponse('error happens')
+    return HttpResponseRedirect('/home/')
+
+def date(request):
+   # db = client.test_database
+   now = datetime.datetime.now();
+   uid=request.session.get('member_id')
+   #html = "<html><body>It is now %s. </br>  %s</body></html>" % now %uid
+   return HttpResponse(uid)
+
+
+def home(request):
+    #if request.session.get is None: #shoud be checked if session not defined
+    if "member_id" not in request.session:
+        fp = open('template/home.html')
+        t = Template(fp.read())
+        fp.close()
+        html = t.render(Context({'className': 'class=behide ', 'classExit': 'class=behide ' }))
+        return HttpResponse(html)
+    #is customer
+    name = request.session.get('member_name')
+    uname = request.session.get('member_uName')
+    if "is_admin" not in request.session:
+        fp = open('template/home.html')
+        t = Template(fp.read())
+        fp.close()
+        html = t.render(Context({'name': name, 'username': uname , 'className': 'class=behide ' , 'notLogin': 'class=behide'}))
+        return HttpResponse(html)
+    #is admin
+    fp = open('template/home.html')
+    t = Template(fp.read())
+    fp.close()
+    html = t.render(Context({'name': name, 'username': uname , 'notLogin': 'class=behide'}))
+    return HttpResponse(html)
+
+
+@csrf_exempt
+def change_info(request):
+    if request.method == 'POST':
+        #new info submited
+        id = request.session.get('member_id')
+        name = request.POST['name']
+        result = change_user_info(id, name ,request.POST['pass'])
+        uname = request.session.get('member_uName')
+        user=db.users.find_one({'username':uname})
+        newName=user['name']
+        request.session['member_name'] = name
+        html = "<html><body>It is now . %s</br> </body></html>" %result
+        return HttpResponse(html)
+
+        return HttpResponseRedirect('/home/')
+    else:
+        name = request.session.get('member_name')
+        t = open_html('template/changeInfo.html')
+        html = t.render(Context({'name':'value=%s' % name}))
+    return HttpResponse(html)
+
+
+###################DATA BASE CONNECTION ###############
+
+
+def create_user(nameu, usern, passw):
+    lowerUserN = usern.lower()
+    user = db.users.find_one({'username':lowerUserN})
+    if user != None:
+        return None
+    db.users.insert_one({
+        'name':nameu,
+        'username':lowerUserN,
+        'password':passw
+    })
+    user = db.users.find_one({'username':lowerUserN})
+    return user
+
+
+
+def find_user(enteredUserName , passw):
+    lowerEn = enteredUserName.lower()
+
+    user = db.users.find_one({'username': lowerEn, 'password' : passw })
+    if user == None :
+        return False
+    else:
+        return user
+    ##RETURN USER ID OR FALSE
+
+
+def is_admin(enteredUserName):
+    lowerUserN = enteredUserName.lower()
+    myUser=db.users.find_one({'username': lowerUserN, 'isAdmin': 'true'})
+
+    if myUser is None:
+        return False
+    else:
+        return True
+
+def change_user_info(userId , name, password):
+     temp = db.users.update_one({'_id':userId},{'$set': {'name': name , 'password': password}})
+     if temp is None:
+         return False
+     return True
+
+
