@@ -105,10 +105,10 @@ button:active {
 		<h3>{{message}}</h3>
 	</div>
 	<div class="container">
-		<a href="../newTweet/"><button id="menu" name="Tweet" type="button" value="newTweet" {{className}}>addItem</button></a>
-		<a href="../timeLine/"><button id="menu" name="myTimeLine" type="button" value="timeLine" {{className}}>EditItem</button></a>
+		<a href="../addItem/"><button id="menu" name="Tweet" type="button" value="newTweet" {{className}}>addItem</button></a>
+		<a href="../editItem/"><button id="menu" name="myTimeLine" type="button" value="timeLine" {{className}}>EditItem</button></a>
 		<a href="/change_info/"><button id="menu" name="editInfo" type="button" value="changeInfo">EditMyProfile</button></a>
-		<a href="/change_info/"><button id="menu" name="editInfo" type="button" value="changeInfo">AdvancedSearch</button></a>
+		<a href="/advance_search/"><button id="menu" name="editInfo" type="button" value="changeInfo">AdvancedSearch</button></a>
 		
 		<form id="menu" action="/search/" method="post">
 		<input type="text" name="username" placeHolder="Enter UserName" required style="float:left; margin-right:2px;">
@@ -123,11 +123,11 @@ button:active {
 <ul>
 {% for item in item_list %}
 	<div class="tweet">
-		<li>{{item.message}} </li>
+		<li>{{item.fields.0.f1}} </li>
 		<br />
 		<div>
 			<form action="/changeTweet/" method="post" id="menu" >
-				<input type="text" name="tweetId" value="{{item.id}}" style="display:none;">
+				<input type="text" name="tweetId" value="{{item.name}}" style="display:none;">
 				<button name="tid" type="submit" value="Edit" style="width:initial; border: initial;">Edit</button>
 			</form>
 			<form action="/deleteTweet/" method="post" id="menu" >

@@ -33,5 +33,6 @@ urlpatterns = [
     #url(r'^search/$', search_result),
     #url(r'^twitter/$', first_page),
     url(r'^logout/$', logout),
+    url(r'^addItem/$', creat_product),
 
 ]

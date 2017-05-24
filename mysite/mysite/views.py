@@ -40,10 +40,12 @@ def signin(request):
     if request.method == 'POST':
         find2 = find_user(request.POST['userName'],request.POST['pass'])
         if find2 != False:
-            find = str(find2['_id']);
+            find = str(find2['_id'])
 
             if is_admin(request.POST['userName']):
-                request.session['is_admin']=True
+                request.session['is_admin'] = True
+            else:
+                request.session['is_admin'] = False
 
             request.session['member_id'] = find
             request.session['member_name'] = find2['name']
@@ -83,6 +85,7 @@ def logout(request):
         del request.session['member_id']
         del request.session['member_name']
         del request.session['member_uName']
+        del request.session['is_admin']
     except KeyError:
         return HttpResponse('error happens')
     return HttpResponseRedirect('/home/')
@@ -116,7 +119,8 @@ def home(request):
     fp = open('template/home.html')
     t = Template(fp.read())
     fp.close()
-    html = t.render(Context({'name': name, 'username': uname , 'notLogin': 'class=behide'}))
+    listItem = get_all_products()
+    html = t.render(Context({'name': name, 'username': uname , 'notLogin': 'class=behide', 'item_list': listItem }))
     return HttpResponse(html)
 
 
@@ -137,6 +141,29 @@ def change_info(request):
         name = request.session.get('member_name')
         t = open_html('template/changeInfo.html')
         html = t.render(Context({'name':'value=%s' % name}))
+    return HttpResponse(html)
+
+
+@csrf_exempt
+def creat_product (request):
+    if request.method == 'POST':
+        html = "<html><body>It is now . </br> </body></html>"
+        pName = request.POST['productName']
+        pType = request.POST['productType']
+        pSubType = request.POST['productSubType']
+        pBrand = request.POST['productBrand']
+        counter = request.POST['counter']
+        fields = []
+        i = 0
+        while `i` != counter:
+            fields.append({"fname":request.POST['inputName' + `(i+1)`], "fvalue" : request.POST['inputVal' + `(i+1)`]})
+            i += 1
+        add_product(pName,pType,pSubType,pBrand,fields)
+        return HttpResponseRedirect('/home/')
+    else:
+        t = open_html('template/creat_product.html')
+        html = t.render(Context())
+
     return HttpResponse(html)
 
 
@@ -187,5 +214,20 @@ def change_user_info(userName , name, password):
     db.users.update_one({'username': userName},{'$set': user})
     user2 = db.users.find_one({'username': userName})
     return user2['name']
+
+
+def add_product(pName,pType,pSubType,pBrand,fields):
+    db.products.insert_one({
+        'name': pName,
+        'type': pType,
+        'subType': pSubType,
+        'brand' : pBrand,
+        'fields' : fields
+    })
+
+
+def get_all_products():
+    return db.products.find()
+
 
 
