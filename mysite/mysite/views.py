@@ -1,3 +1,4 @@
+from celery.worker import request
 from django.http import HttpResponse
 from pymongo import MongoClient
 import datetime
@@ -80,6 +81,8 @@ def signup(request):
 def logout(request):
     try:
         del request.session['member_id']
+        del request.session['member_name']
+        del request.session['member_uName']
     except KeyError:
         return HttpResponse('error happens')
     return HttpResponseRedirect('/home/')
@@ -123,10 +126,8 @@ def change_info(request):
         #new info submited
         id = request.session.get('member_id')
         name = request.POST['name']
-        result = change_user_info(id, name ,request.POST['pass'])
         uname = request.session.get('member_uName')
-        user=db.users.find_one({'username':uname})
-        newName=user['name']
+        result = change_user_info(uname, name, request.POST['pass'])
         request.session['member_name'] = name
         html = "<html><body>It is now . %s</br> </body></html>" %result
         return HttpResponse(html)
@@ -170,17 +171,21 @@ def find_user(enteredUserName , passw):
 
 def is_admin(enteredUserName):
     lowerUserN = enteredUserName.lower()
-    myUser=db.users.find_one({'username': lowerUserN, 'isAdmin': 'true'})
+    myUser = db.users.find_one({'username': lowerUserN, 'isAdmin': 'true'})
 
     if myUser is None:
         return False
     else:
         return True
 
-def change_user_info(userId , name, password):
-     temp = db.users.update_one({'_id':userId},{'$set': {'name': name , 'password': password}})
-     if temp is None:
-         return False
-     return True
+
+def change_user_info(userName , name, password):
+
+    user = db.users.find_one({'username': userName})
+    user['name'] = name
+    user['password'] = password
+    db.users.update_one({'username': userName},{'$set': user})
+    user2 = db.users.find_one({'username': userName})
+    return user2['name']
 
 
