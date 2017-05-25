@@ -155,12 +155,15 @@ def creat_product (request):
         pSubType = request.POST['productSubType']
         pBrand = request.POST['productBrand']
         counter = request.POST['counter']
+        avaiablity = request.POST['productAvailability']
+        price = request.POST['productPrice']
+        num = request.POST['productNumber']
         fields = []
         i = 0
         while `i` != counter:
             fields.append({"fname":request.POST['inputName' + `(i+1)`], "fvalue" : request.POST['inputVal' + `(i+1)`]})
             i += 1
-        add_product(pName,pType,pSubType,pBrand,fields)
+        add_product(pName,pType,pSubType,pBrand,num,price,avaiablity,fields)
         return HttpResponseRedirect('/home/')
     else:
         t = open_html('template/creat_product.html')
@@ -177,6 +180,18 @@ def simple_search_product (request):
         product = get_product(pName)
         field2 = {'hello': 'ghjkl', 'sdhfksd' : 'slkdfj'}
     return HttpResponse(product.get('name'))
+
+@csrf_exempt
+def edit_product (request):
+    if request.method == 'POST':
+        pName = request.POST['productName']
+        product = get_product(pName)
+        t = open_html('template/edit_product.html')
+        message = HttpResponse(t.render(Context({'pname':product.get('name') , 'ptype':product.get('type') ,
+                                                 'psubtype':product.get('subtype'), 'pbrand':product.get('brand'),
+                                                 'pnumber' : product.get('num') , 'pprice': product.get('price') ,
+                                                 'fields' : product.get('fields')})))
+        return HttpResponse(message)
 
 
 ###################DATA BASE CONNECTION ###############
@@ -228,13 +243,15 @@ def change_user_info(userName , name, password):
     return user2['name']
 
 
-def add_product(pName,pType,pSubType,pBrand,num,fields):
+def add_product(pName,pType,pSubType,pBrand,num,price,avaiablity,fields):
     db.products.insert_one({
         'name': pName,
         'type': pType,
         'subType': pSubType,
         'brand' : pBrand,
         'num' : num,
+        'price' : price,
+        'avaiability' : avaiablity,
         'fields' : fields
     })
 

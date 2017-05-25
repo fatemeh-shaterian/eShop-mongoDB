@@ -126,8 +126,8 @@ button:active {
 		<li>{{item.name}} </li>
 		<br />
 		<div>
-			<form action="/changeTweet/" method="post" id="menu" >
-				<input type="text" name="tweetId" value="{{item.name}}" style="display:none;">
+			<form action="/editProduct/" method="post" id="menu" >
+				<input type="text" name="productName" value="{{item.name}}" style="display:none;">
 				<button name="tid" type="submit" value="Edit" style="width:initial; border: initial;">Edit</button>
 			</form>
 			<form action="/deleteTweet/" method="post" id="menu" >
