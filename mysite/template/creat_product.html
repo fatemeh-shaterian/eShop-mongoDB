@@ -112,12 +112,30 @@
         <input type="text" name="productBrand" style="margin-left: 22px;" required>
         </div>
         </br>
+        <div class="item">
+        product number :
+        <input type="text" name="productNumber" style="margin-left: 22px;" required>
+        </div>
+        </br>
+        <div class="item">
+        product avaiability :
+        <input type="radio" name="productAvailability" value="tru" style="margin-left: 22px;" required> Available
+        <input type="radio" name="productAvailability" value="false" style="margin-left: 22px;" required> UnAvailable
+        </div>
+        </br>
+
+        <div class="item">
+            product price :
+            <input type="text" name="productPrice" style="margin-left: 22px;" required>
+        </div>
 
 
         <div id="dynamicInput" class="item">
               field 1<br><input type="text" name="inputName1">
                    <input type="text" name="inputVal1">
         </div>
+
+
         <input  id="counter" name="counter" type="number" value=1>
         </br></br>
         <input  class="button" type="button" value="Add another text input" onClick="addInput('dynamicInput');">
