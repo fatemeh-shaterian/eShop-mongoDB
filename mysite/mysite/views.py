@@ -1,4 +1,4 @@
-from celery.worker import request
+#from celery.worker import request
 from django.http import HttpResponse
 from pymongo import MongoClient
 import datetime

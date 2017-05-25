@@ -23,7 +23,6 @@ urlpatterns = [
     url(r'^date/$', date),
     #url(r'^date/(\d{1,2})/$', dateCal),
     #url(r'^temDate/$', current_datetime),
-
     #url(r'^signup_form/$', signUp_form),
     url(r'^signup/$',signup),
     url(r'^signin/$',signin),
