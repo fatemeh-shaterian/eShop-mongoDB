@@ -182,16 +182,38 @@ def simple_search_product (request):
     return HttpResponse(product.get('name'))
 
 @csrf_exempt
-def edit_product (request):
+def edit_product_page (request):
     if request.method == 'POST':
         pName = request.POST['productName']
         product = get_product(pName)
         t = open_html('template/edit_product.html')
         message = HttpResponse(t.render(Context({'pname':product.get('name') , 'ptype':product.get('type') ,
-                                                 'psubtype':product.get('subtype'), 'pbrand':product.get('brand'),
+                                                 'psubtype':product.get('subType'), 'pbrand':product.get('brand'),
                                                  'pnumber' : product.get('num') , 'pprice': product.get('price') ,
-                                                 'fields' : product.get('fields')})))
+                                                 'fields' : product.get('fields') ,
+                                                 'numberoffields': len(product.get('fields')) })))
         return HttpResponse(message)
+
+@csrf_exempt
+def edit_product(request):
+    if request.method == 'POST':
+        pName = request.POST['productName']
+        pType = request.POST['productType']
+        pSubType = request.POST['productSubType']
+        pBrand = request.POST['productBrand']
+        counter = request.POST['counter']
+        avaiablity = request.POST['productAvailability']
+        price = request.POST['productPrice']
+        num = request.POST['productNumber']
+        fields = []
+        i = 0
+        while `i` != counter:
+            fields.append(
+                {"fname": request.POST['inputName' + `(i + 1)`], "fvalue": request.POST['inputVal' + `(i + 1)`]})
+            i += 1
+        update_product(pName, pType, pSubType, pBrand, num, price, avaiablity, fields)
+    return HttpResponseRedirect('/home/')
+
 
 
 ###################DATA BASE CONNECTION ###############
@@ -254,6 +276,19 @@ def add_product(pName,pType,pSubType,pBrand,num,price,avaiablity,fields):
         'avaiability' : avaiablity,
         'fields' : fields
     })
+
+def update_product(pName,pType,pSubType,pBrand,num,price,avaiablity,fields):
+
+    product = db.products.find_one({'name': pName})
+    product['type'] = pType
+    product['subType'] = pSubType
+    product['brand'] = pBrand
+    product['num'] = num
+    product['price'] = price
+    product['avaiability'] = avaiablity
+    product['fields'] = fields
+    db.products.update_one({'name': pName}, {'$set': product})
+
 
 
 def get_all_products():

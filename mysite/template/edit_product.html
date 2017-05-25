@@ -91,10 +91,11 @@
 
 <body>
     <div class="header"> <h1>Creat product</h1></div>
-    <form method="POST" action="../addItem/">
+    <form method="POST" action="../updateProduct/">
         <div class="item">
         product name :
-        <input type="text" name="productName" value = "{{pname}}" style="margin-left: 22px;" required>
+        <input type="text" value = "{{pname}}" style="margin-left: 22px;" required disabled>
+        <input type="text" name="productName" value = "{{pname}}" style="margin-left: 22px;" required class="behide">
         </div>
         </br>
         <div class="item">
@@ -104,7 +105,7 @@
         </br>
         <div class="item">
         product subtype :
-        <input type="text" name="productSubType" vlaue="{{psubtype}}" style="margin-left: 22px;" required>
+        <input type="text" name="productSubType" value="{{psubtype}}" style="margin-left: 22px;" required>
         </div>
         </br>
         <div class="item">
@@ -131,16 +132,21 @@
 
 
         <div id="dynamicInput" class="item">
-            {% i = 0 %}
+        {% with i=1 %}
             {% for item in fields %}
-                {% i%}
-              field 1<br><input type="text" name="inputName1">
-                   <input type="text" name="inputVal1">
+                <div id="div{{forloop.counter}}">
+              field {{forloop.counter}}<br><input type="text" name="inputName{{forloop.counter}}" value="{{item.fname}}">
+                   <input type="text" name="inputVal{{forloop.counter}}" value="{{item.fvalue}}">
+                    </div>
+        </br>
+
+
             {% endfor %}
+
         </div>
 
 
-        <input  id="counter" name="counter" type="number" value=1>
+        <input  id="counter" name="counter" type="number" value={{numberoffields}}>
         </br></br>
         <input  class="button" type="button" value="Add another text input" onClick="addInput('dynamicInput');">
         <input class="button" type="button" value="Rem another text input" onClick="remInput('dynamicInput');">
@@ -148,7 +154,7 @@
     </form>
 </body>
 <script>
-    var counter = 1;
+    var counter = {{numberoffields}};
     //var limit = 3;
     function addInput(divName)
     {
@@ -166,6 +172,7 @@
     function remInput(divName)
     {
         {
+            console.log(counter);
               var newdiv = document.getElementById('div'+counter).remove();
               counter--;
               document.getElementById("counter").value = counter;
@@ -174,3 +181,4 @@
 
 </script>
 </html>
+{% endwith %}

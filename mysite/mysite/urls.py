@@ -34,5 +34,6 @@ urlpatterns = [
     url(r'^logout/$', logout),
     url(r'^addItem/$', creat_product),
     url(r'^search/$', simple_search_product),
-    url(r'^editProduct/$', edit_product),
+    url(r'^editProduct/$', edit_product_page),
+    url(r'^updateProduct/$', edit_product),
 ]
