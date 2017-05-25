@@ -34,5 +34,6 @@ urlpatterns = [
     #url(r'^twitter/$', first_page),
     url(r'^logout/$', logout),
     url(r'^addItem/$', creat_product),
+    url(r'^search/$', simple_search_product),
 
 ]

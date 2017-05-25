@@ -109,7 +109,8 @@ def home(request):
     #is customer
     name = request.session.get('member_name')
     uname = request.session.get('member_uName')
-    if "is_admin" not in request.session:
+    isAdmin = request.session.get('is_admin')
+    if isAdmin is False:
         fp = open('template/home.html')
         t = Template(fp.read())
         fp.close()
@@ -120,6 +121,7 @@ def home(request):
     t = Template(fp.read())
     fp.close()
     listItem = get_all_products()
+
     html = t.render(Context({'name': name, 'username': uname , 'notLogin': 'class=behide', 'item_list': listItem }))
     return HttpResponse(html)
 
@@ -165,6 +167,16 @@ def creat_product (request):
         html = t.render(Context())
 
     return HttpResponse(html)
+
+
+@csrf_exempt
+def simple_search_product (request):
+    if request.method == 'POST':
+        html = "<html><body>It is now . </br> </body></html>"
+        pName = request.POST['pName']
+        product = get_product(pName)
+        field2 = {'hello': 'ghjkl', 'sdhfksd' : 'slkdfj'}
+    return HttpResponse(product.get('name'))
 
 
 ###################DATA BASE CONNECTION ###############
@@ -216,12 +228,13 @@ def change_user_info(userName , name, password):
     return user2['name']
 
 
-def add_product(pName,pType,pSubType,pBrand,fields):
+def add_product(pName,pType,pSubType,pBrand,num,fields):
     db.products.insert_one({
         'name': pName,
         'type': pType,
         'subType': pSubType,
         'brand' : pBrand,
+        'num' : num,
         'fields' : fields
     })
 
@@ -230,4 +243,5 @@ def get_all_products():
     return db.products.find()
 
 
-
+def get_product( name ):
+    return db.products.find_one({'name': name})
